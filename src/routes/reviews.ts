@@ -1,6 +1,12 @@
 // ==================== src/routes/reviews.ts ====================
 import { Router } from 'express';
-import { authenticateUser,  } from '../middleware/auth';
+import { 
+  authenticateToken,
+  requireRole, 
+  requireAdmin,
+  optionalAuth,
+  type AuthRequest 
+} from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
 import { 
   createReviewSchema, 
@@ -29,7 +35,7 @@ router.get('/service/:serviceId/stats',
 
 // GET /api/reviews/user/:userId? - Get reviews by user (optional userId)
 router.get('/user/:userId',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ query: reviewQuerySchema }),
   reviewController.getUserReviews
 );
@@ -42,14 +48,14 @@ router.get('/:id',
 
 // POST /api/reviews - Create new review
 router.post('/',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ body: createReviewSchema }),
   reviewController.createReview
 );
 
 // PUT /api/reviews/:id - Update review
 router.put('/:id',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ 
     params: { id: reviewParamsSchema.id },
     body: updateReviewSchema 
@@ -59,14 +65,14 @@ router.put('/:id',
 
 // DELETE /api/reviews/:id - Delete review
 router.delete('/:id',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ params: { id: reviewParamsSchema.id } }),
   reviewController.deleteReview
 );
 
 // POST /api/reviews/:id/vote - Vote on review (helpful/not helpful)
 router.post('/:id/vote',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ 
     params: { id: reviewParamsSchema.id },
     body: { vote_type: reviewParamsSchema.vote_type }
@@ -76,14 +82,14 @@ router.post('/:id/vote',
 
 // DELETE /api/reviews/:id/vote - Remove vote from review
 router.delete('/:id/vote',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ params: { id: reviewParamsSchema.id } }),
   reviewController.removeReviewVote
 );
 
 // GET /api/reviews/:id/vote - Get user's vote on review
 router.get('/:id/vote',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ params: { id: reviewParamsSchema.id } }),
   reviewController.getUserVoteOnReview
 );

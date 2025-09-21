@@ -1,6 +1,13 @@
 // ==================== src/routes/categories.ts ====================
 import { Router } from 'express';
-import { authenticateUser } from '../middleware/auth';
+
+import { 
+  authenticateToken,
+  requireRole, 
+  requireAdmin,
+  optionalAuth,
+  type AuthRequest 
+} from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
 import { createCategorySchema, categoryParamsSchema } from '../schemas/categorySchemas';
 import * as categoryController from '../controllers/categoryController';
@@ -20,14 +27,14 @@ router.get('/:id',
 
 // POST /api/categories - Create new category (admin only)
 router.post('/',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ body: createCategorySchema }),
   categoryController.createCategory
 );
 
 // PUT /api/categories/:id - Update category (admin only)
 router.put('/:id',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ 
     params: { id: categoryParamsSchema.id },
     body: createCategorySchema 
@@ -37,7 +44,7 @@ router.put('/:id',
 
 // DELETE /api/categories/:id - Delete category (admin only)
 router.delete('/:id',
-  authenticateUser,
+  authenticateToken,
   validateRequest({ params: { id: categoryParamsSchema.id } }),
   categoryController.deleteCategory
 );

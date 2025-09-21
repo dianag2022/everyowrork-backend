@@ -1,5 +1,5 @@
 // ==================== src/services/serviceService.ts ====================
-import { supabase, supabaseAdmin } from '../config/supabase';
+import { supabase } from '../config/supabase';
 import { createError } from '../middleware/errorHandler';
 
 export interface Service {
@@ -263,7 +263,7 @@ export const getServicesForMap = async (bounds?: {
 export const createService = async (serviceData: CreateServiceData & { provider_id: string }): Promise<Service> => {
   const { location, ...otherData } = serviceData;
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('services')
     .insert([
       {
@@ -322,7 +322,7 @@ export const updateService = async (
     updateObject.postal_code = location.postal_code ?? null;
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('services')
     .update(updateObject)
     .eq('id', serviceId)
@@ -359,7 +359,7 @@ export const toggleServiceStatus = async (
   // Toggle the status
   const newStatus = !currentService.status;
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('services')
     .update({ 
       status: newStatus,
@@ -380,7 +380,7 @@ export const toggleServiceStatus = async (
 
 // Soft delete service (set status to false)
 export const deleteService = async (serviceId: string, userId: string): Promise<void> => {
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('services')
     .update({ 
       status: false,

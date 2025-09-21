@@ -1,7 +1,13 @@
 // ==================== src/routes/storage.ts ====================
 import { Router } from 'express';
 import multer from 'multer';
-import { authenticateUser } from '../middleware/auth';
+import { 
+  authenticateToken,
+  requireRole, 
+  requireAdmin,
+  optionalAuth,
+  type AuthRequest 
+} from '../middleware/auth';
 import { validateRequest } from '../middleware/validation';
 import { uploadSchema } from '../schemas/storageSchemas';
 import * as storageController from '../controllers/storageController';
@@ -28,7 +34,7 @@ const upload = multer({
 
 // POST /api/storage/upload - Upload service images
 router.post('/upload',
-  authenticateUser,
+  authenticateToken,
   upload.array('images', 10), // Accept up to 10 images
   validateRequest({ body: uploadSchema }),
   storageController.uploadServiceImages
@@ -36,7 +42,7 @@ router.post('/upload',
 
 // DELETE /api/storage/delete - Delete service images
 router.delete('/delete',
-  authenticateUser,
+  authenticateToken,
   storageController.deleteServiceImages
 );
 

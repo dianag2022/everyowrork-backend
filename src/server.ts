@@ -1,10 +1,13 @@
 // ==================== Actualizar src/server.ts ====================
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
-import dotenv from 'dotenv';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 // import { rateLimiter } from './middleware/rateLimiter';
 
@@ -14,7 +17,6 @@ import reviewsRoutes from './routes/reviews';
 import categoriesRoutes from './routes/categories';
 import storageRoutes from './routes/storage';
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;

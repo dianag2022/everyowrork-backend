@@ -12,7 +12,7 @@ export const getServices = async (
   try {
     const services = await serviceService.getActiveServices();
     res.json({
-      success: true,
+      status: 'success',
       data: services,
       count: services.length
     });
@@ -49,16 +49,18 @@ export const searchServices = async (
     );
 
     res.json({
-      success: true,
+      status: 'success',
       data: services,
       count: services.length,
-      filters: {
-        query,
-        category,
-        minPrice,
-        maxPrice,
-        location: userLocation,
-        radiusKm
+      meta: {
+        filters: {
+          query,
+          category,
+          minPrice,
+          maxPrice,
+          location: userLocation,
+          radiusKm
+        }
       }
     });
   } catch (error) {
@@ -84,9 +86,12 @@ export const getServicesForMap = async (
     const services = await serviceService.getServicesForMap(bounds);
     
     res.json({
-      success: true,
+      status: 'success',
       data: services,
-      count: services.length
+      count: services.length,
+      meta: {
+        bounds
+      }
     });
   } catch (error) {
     next(error);
@@ -103,10 +108,12 @@ export const getServicesByCategory = async (
     const services = await serviceService.getServicesByCategory(category);
     
     res.json({
-      success: true,
+      status: 'success',
       data: services,
       count: services.length,
-      category
+      meta: {
+        category
+      }
     });
   } catch (error) {
     next(error);
@@ -123,10 +130,12 @@ export const getServicesByProvider = async (
     const services = await serviceService.getServicesByProvider(providerId);
     
     res.json({
-      success: true,
+      status: 'success',
       data: services,
       count: services.length,
-      providerId
+      meta: {
+        providerId
+      }
     });
   } catch (error) {
     next(error);
@@ -147,7 +156,7 @@ export const getServiceById = async (
     }
 
     res.json({
-      success: true,
+      status: 'success',
       data: service
     });
   } catch (error) {
@@ -173,9 +182,11 @@ export const createService = async (
     const service = await serviceService.createService(serviceData);
     
     res.status(201).json({
-      success: true,
-      message: 'Service created successfully',
-      data: service
+      status: 'success',
+      data: service,
+      meta: {
+        message: 'Service created successfully'
+      }
     });
   } catch (error) {
     next(error);
@@ -198,9 +209,11 @@ export const updateService = async (
     const service = await serviceService.updateService(id, updateData, req.user.id);
     
     res.json({
-      success: true,
-      message: 'Service updated successfully',
-      data: service
+      status: 'success',
+      data: service,
+      meta: {
+        message: 'Service updated successfully'
+      }
     });
   } catch (error) {
     next(error);
@@ -221,9 +234,11 @@ export const toggleServiceStatus = async (
     const service = await serviceService.toggleServiceStatus(id, req.user.id);
     
     res.json({
-      success: true,
-      message: `Service ${service.status ? 'activated' : 'deactivated'} successfully`,
-      data: service
+      status: 'success',
+      data: service,
+      meta: {
+        message: `Service ${service.status ? 'activated' : 'deactivated'} successfully`
+      }
     });
   } catch (error) {
     next(error);
@@ -241,11 +256,17 @@ export const deleteService = async (
     }
 
     const { id } = req.params;
-    await serviceService.deleteService(id, req.user.id);
+    const deletedService = await serviceService.deleteService(id, req.user.id);
     
     res.json({
-      success: true,
-      message: 'Service deleted successfully'
+      status: 'success',
+      data: {
+        id: id,
+        deleted: true
+      },
+      meta: {
+        message: 'Service deleted successfully'
+      }
     });
   } catch (error) {
     next(error);

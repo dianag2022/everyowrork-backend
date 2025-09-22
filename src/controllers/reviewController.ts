@@ -30,6 +30,10 @@ export const getServiceReviews = async (
         total_count: reviews.total_count,
         has_more: reviews.has_more,
         next_cursor: reviews.next_cursor
+      },
+      stats: {
+        average_rating: reviews.average_rating,
+        total_reviews: reviews.total_reviews
       }
     });
   } catch (error) {

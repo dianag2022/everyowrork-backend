@@ -30,6 +30,8 @@ export interface PaginatedReviews {
   total_count: number;
   has_more: boolean;
   next_cursor?: string;
+  average_rating: number;
+  total_reviews: number;
 }
 
 export interface ReviewStats {
@@ -68,6 +70,7 @@ export const getServiceReviews = async (
       break;
   }
 
+  // Fetch reviews with pagination
   const { data: reviews, error: reviewsError } = await supabase
     .from('reviews')
     .select(`
@@ -90,6 +93,7 @@ export const getServiceReviews = async (
     throw createError('Failed to fetch reviews', 500);
   }
 
+  // Get total count
   const { count, error: countError } = await supabase
     .from('reviews')
     .select('*', { count: 'exact', head: true })
@@ -100,11 +104,47 @@ export const getServiceReviews = async (
     throw createError('Failed to count reviews', 500);
   }
 
+  // ADD: Calculate statistics using Supabase RPC or aggregation
+  const { data: stats, error: statsError } = await supabase
+    .rpc('get_service_review_stats', { service_id: serviceId });
+
+  if (statsError) {
+    console.error('Error fetching review stats:', statsError);
+    // If RPC fails, calculate manually from the reviews
+    const { data: allReviews, error: allReviewsError } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('service_id', serviceId);
+
+    if (allReviewsError) {
+      console.error('Error fetching all reviews for stats:', allReviewsError);
+      throw createError('Failed to calculate review statistics', 500);
+    }
+
+    const total_reviews = allReviews?.length || 0;
+    const average_rating = total_reviews > 0 
+      ? allReviews!.reduce((sum, review) => sum + review.rating, 0) / total_reviews 
+      : 0;
+
+    return {
+      reviews: reviews as ReviewWithReviewer[],
+      total_count: count || 0,
+      has_more: (offset + limit) < (count || 0),
+      next_cursor: (offset + limit) < (count || 0) ? (page + 1).toString() : undefined,
+      // Add calculated stats
+      average_rating: Math.round(average_rating * 100) / 100, // Round to 2 decimals
+      total_reviews: total_reviews
+    };
+  }
+
   return {
     reviews: reviews as ReviewWithReviewer[],
     total_count: count || 0,
     has_more: (offset + limit) < (count || 0),
-    next_cursor: (offset + limit) < (count || 0) ? (page + 1).toString() : undefined
+    next_cursor: (offset + limit) < (count || 0) ? (page + 1).toString() : undefined,
+    // Add stats from RPC
+    average_rating: stats?.average_rating || 0,
+    total_reviews: stats?.total_reviews || 0
   };
 };
 
@@ -154,7 +194,7 @@ export const createReview = async (reviewData: any): Promise<Review> => {
     .maybeSingle();
 
   if (existingReview) {
-    throw createError('You have already reviewed this service', 400);
+    throw createError('Ya ha calificado este servicio.', 400);
   }
 
   const { data, error } = await supabaseAdmin

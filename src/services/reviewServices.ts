@@ -186,16 +186,18 @@ export const getServiceReviewStats = async (serviceId: string): Promise<ReviewSt
 
 export const createReview = async (reviewData: any): Promise<Review> => {
   // Check if user has already reviewed this service
-  const { data: existingReview } = await supabase
-    .from('reviews')
-    .select('id')
-    .eq('service_id', reviewData.service_id)
-    .eq('reviewer_id', reviewData.reviewer_id)
-    .maybeSingle();
+  // const { data: existingReview } = await supabase
+  //   .from('reviews')
+  //   .select('id')
+  //   .eq('service_id', reviewData.service_id)
+  //   .eq('reviewer_id', reviewData.reviewer_id)
+  //   .maybeSingle();
 
-  if (existingReview) {
-    throw createError('Ya ha calificado este servicio.', 400);
-  }
+  // if (existingReview) {
+  //   console.log("existingReview", existingReview);
+    
+  //   throw createError('Ya has calificado este servicio.', 400);
+  // }
 
   const { data, error } = await supabaseAdmin
     .from('reviews')

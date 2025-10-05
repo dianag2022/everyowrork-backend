@@ -121,6 +121,7 @@ export const createReview = async (
   next: NextFunction
 ) => {
   try {
+    
     if (!req.user?.id) {
       throw createError('User not authenticated', 401);
     }
@@ -180,7 +181,8 @@ export const deleteReview = async (
 
     res.json({
       success: true,
-      message: 'Review deleted successfully'
+      message: 'Review deleted successfully',
+       data: { id }
     });
   } catch (error) {
     next(error);

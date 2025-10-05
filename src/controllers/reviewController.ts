@@ -23,7 +23,7 @@ export const getServiceReviews = async (
     );
 
     res.json({
-      success: true,
+      status: "success",
       data: reviews.reviews,
       pagination: {
         current_page: parseInt(page),
@@ -51,7 +51,7 @@ export const getServiceReviewStats = async (
     const stats = await reviewService.getServiceReviewStats(serviceId);
 
     res.json({
-      success: true,
+      status: "success",
       data: stats
     });
   } catch (error) {
@@ -80,7 +80,7 @@ export const getUserReviews = async (
     );
 
     res.json({
-      success: true,
+      status: "success",
       data: reviews.reviews,
       pagination: {
         current_page: parseInt(page),
@@ -107,7 +107,7 @@ export const getReviewById = async (
     }
 
     res.json({
-      success: true,
+      status: "success",
       data: review
     });
   } catch (error) {
@@ -134,7 +134,7 @@ export const createReview = async (
     const review = await reviewService.createReview(reviewData);
 
     res.status(201).json({
-      success: true,
+      status: "success",
       message: 'Review created successfully',
       data: review
     });
@@ -157,7 +157,7 @@ export const updateReview = async (
     const review = await reviewService.updateReview(id, req.body, req.user.id);
 
     res.json({
-      success: true,
+      status: "success",
       message: 'Review updated successfully',
       data: review
     });
@@ -180,7 +180,7 @@ export const deleteReview = async (
     await reviewService.deleteReview(id, req.user.id);
 
     res.json({
-      success: true,
+      status: "success",
       message: 'Review deleted successfully',
        data: { id }
     });
@@ -205,7 +205,7 @@ export const voteOnReview = async (
     const vote = await reviewService.voteOnReview(id, vote_type, req.user.id);
 
     res.json({
-      success: true,
+      status: "success",
       message: 'Vote recorded successfully',
       data: vote
     });
@@ -228,7 +228,7 @@ export const removeReviewVote = async (
     await reviewService.removeReviewVote(id, req.user.id);
 
     res.json({
-      success: true,
+      status: "success",
       message: 'Vote removed successfully'
     });
   } catch (error) {
@@ -250,7 +250,7 @@ export const getUserVoteOnReview = async (
     const vote = await reviewService.getUserVoteOnReview(id, req.user.id);
 
     res.json({
-      success: true,
+      status: "success",
       data: vote
     });
   } catch (error) {

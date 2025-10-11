@@ -12,6 +12,11 @@ export interface Service {
   provider_id: string;
   main_image?: string;
   gallery?: string[];
+  socialMedia?: [{
+    name: string;
+    url: string;
+    }
+  ];
   status: boolean;
   latitude?: number;
   longitude?: number;
@@ -20,8 +25,6 @@ export interface Service {
   state?: string;
   country?: string;
   postal_code?: string;
-  embed_title?: string;
-  embed_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -42,6 +45,11 @@ export interface CreateServiceData {
   max_price: number;
   main_image?: string;
   gallery?: string[];
+  social_media?: [{
+    name: string;
+    url: string;
+    }
+  ];
   location?: {
     latitude?: number;
     longitude?: number;
@@ -51,8 +59,6 @@ export interface CreateServiceData {
     country?: string;
     postal_code?: string;
   };
-  embed_title?: string;
-  embed_url?: string;
 }
 
 // Get all active services with provider information
@@ -273,6 +279,7 @@ export const createService = async (serviceData: CreateServiceData & { provider_
         max_price: serviceData.max_price || 0,
         main_image: serviceData.main_image,
         gallery: serviceData.gallery || [],
+        social_media: serviceData.social_media || [],
         
         // Location fields
         latitude: location?.latitude || null,
@@ -283,9 +290,6 @@ export const createService = async (serviceData: CreateServiceData & { provider_
         country: location?.country || 'Colombia',
         postal_code: location?.postal_code || null,
         
-        // Embedded content
-        embed_title: serviceData.embed_title || null,
-        embed_url: serviceData.embed_url || null,
       }
     ])
     .select()

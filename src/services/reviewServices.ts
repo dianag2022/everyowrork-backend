@@ -107,6 +107,8 @@ export const getServiceReviews = async (
   // ADD: Calculate statistics using Supabase RPC or aggregation
   const { data: stats, error: statsError } = await supabase
     .rpc('get_service_review_stats', { service_id: serviceId });
+  
+  
 
   if (statsError) {
     console.error('Error fetching review stats:', statsError);
@@ -137,14 +139,16 @@ export const getServiceReviews = async (
     };
   }
 
+  const statsData = stats && stats.length > 0 ? stats[0] : null;
+
   return {
     reviews: reviews as ReviewWithReviewer[],
     total_count: count || 0,
     has_more: (offset + limit) < (count || 0),
     next_cursor: (offset + limit) < (count || 0) ? (page + 1).toString() : undefined,
     // Add stats from RPC
-    average_rating: stats?.average_rating || 0,
-    total_reviews: stats?.total_reviews || 0
+    average_rating: statsData?.average_rating || 0,
+    total_reviews: statsData?.total_reviews || 0
   };
 };
 

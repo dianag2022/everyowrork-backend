@@ -84,31 +84,113 @@ export const getActiveServices = async (): Promise<ServiceWithProvider[]> => {
   return data as ServiceWithProvider[];
 };
 
-// Get service by ID with provider information
+
+
+// Get service by ID with provider information (handles both full UUID and short UUID)
 export const getServiceById = async (id: string): Promise<ServiceWithProvider | null> => {
-  const { data, error } = await supabase
-    .from('services')
-    .select(`
-      *,
-      provider:profiles (
-        id,
-        email,
-        raw_user_meta_data
-      )
-    `)
-    .eq('id', id)
-    .single();
+  try {
+    console.log('Looking for service with ID:', id);
+    
+    // Check if it's a short UUID (8 characters) or full UUID (36 characters with hyphens)
+    const isShortUuid = id.length === 8 && !id.includes('-');
+    
+    console.log('Is short UUID:', isShortUuid);
+    
+    if (isShortUuid) {
+      // Use RPC function to search by short UUID
+      const { data: services, error } = await supabase
+        .rpc('find_service_by_short_uuid', { short_uuid: id });
 
-  if (error) {
-    if (error.code === 'PGRST116') {
-      return null; // Service not found
+      console.log('RPC query result:', { services, error });
+
+      if (error) {
+        console.error('Error fetching service by short UUID:', error);
+        throw createError('Failed to fetch service', 500);
+      }
+
+      if (!services || services.length === 0) {
+        console.log('Service not found with short UUID:', id);
+        return null;
+      }
+
+      const service = services[0];
+
+      // Now fetch the provider information separately
+      const { data: provider, error: providerError } = await supabase
+        .from('profiles')
+        .select('id, email, raw_user_meta_data')
+        .eq('id', service.provider_id)
+        .single();
+
+      if (providerError) {
+        console.error('Error fetching provider:', providerError);
+      }
+
+      return {
+        ...service,
+        provider: provider || null
+      } as ServiceWithProvider;
+
+    } else {
+      // Full UUID - use exact match (original logic)
+      const { data, error } = await supabase
+        .from('services')
+        .select(`
+          *,
+          provider:profiles!provider_id (
+            id,
+            email,
+            raw_user_meta_data
+          )
+        `)
+        .eq('id', id)
+        .eq('status', true)
+        .single();
+
+      console.log('Supabase query result (full UUID):', { data, error });
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.log('Service not found with full UUID:', id);
+          return null;
+        }
+        console.error('Error fetching service:', error);
+        throw createError('Failed to fetch service', 500);
+      }
+
+      return data as ServiceWithProvider;
     }
-    console.error('Error fetching service:', error);
-    throw createError('Failed to fetch service', 500);
+  } catch (error) {
+    console.error('Error in getServiceById:', error);
+    throw error;
   }
-
-  return data as ServiceWithProvider;
 };
+
+// // Get service by ID with provider information
+// export const getServiceById = async (id: string): Promise<ServiceWithProvider | null> => {
+//   const { data, error } = await supabase
+//     .from('services')
+//     .select(`
+//       *,
+//       provider:profiles (
+//         id,
+//         email,
+//         raw_user_meta_data
+//       )
+//     `)
+//     .eq('id', id)
+//     .single();
+
+//   if (error) {
+//     if (error.code === 'PGRST116') {
+//       return null; // Service not found
+//     }
+//     console.error('Error fetching service:', error);
+//     throw createError('Failed to fetch service', 500);
+//   }
+
+//   return data as ServiceWithProvider;
+// };
 
 // Get services by category
 export const getServicesByCategory = async (category: string): Promise<ServiceWithProvider[]> => {

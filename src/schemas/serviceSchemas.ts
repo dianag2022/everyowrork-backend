@@ -60,7 +60,20 @@ export const searchServicesSchema = Joi.object({
 });
 
 export const serviceParamsSchema = {
-  id: Joi.string().uuid().required(),
+  id: Joi.string().custom((value, helpers) => {
+    // Accept either full UUID or 8-character short UUID
+    const isFullUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+    const isShortUuid = /^[0-9a-f]{8}$/i.test(value);
+    
+    if (!isFullUuid && !isShortUuid) {
+      return helpers.error('any.invalid');
+    }
+    
+    return value;
+  }).required().messages({
+    'any.invalid': 'Invalid service ID format. Must be a valid UUID or 8-character short UUID.',
+    'any.required': 'Service ID is required'
+  }),
   category: Joi.string().max(100).required(),
   providerId: Joi.string().uuid().required()
 };

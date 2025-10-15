@@ -53,6 +53,12 @@ router.get('/provider/:providerId',
   serviceController.getServicesByProvider
 );
 
+// GET /api/services/my-services/count - Get my services count
+router.get('/count',
+  validateRequest({ params: {} }),
+  optionalAuth,
+  serviceController.countServicesByProviderId
+);
 // GET /api/services/:id - Get specific service by ID
 router.get('/:id',
   validateRequest({ params: { id: serviceParamsSchema.id } }),

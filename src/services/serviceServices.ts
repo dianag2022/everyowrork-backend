@@ -385,6 +385,23 @@ export const createService = async (serviceData: CreateServiceData & { provider_
   return data as Service;
 };
 
+
+// Count services by provider ID
+export const countServicesByProviderId = async (providerId: string): Promise<number> => {
+  const { count, error } = await supabase
+    .from('services')
+    .select('*', { count: 'exact', head: true })
+    .eq('provider_id', providerId)
+    .eq('status', true);
+
+  if (error) {
+    console.error('Error counting services:', error);
+    throw createError('Failed to count services', 500);
+  }
+
+  return count || 0;
+};
+
 // Update existing service
 export const updateService = async (
   serviceId: string,

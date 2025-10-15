@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import * as serviceService from '../services/serviceServices';
+import { SERVICE_LIMITS } from '../config/constants';
 
 export const getServices = async (
   req: AuthRequest,
@@ -173,6 +174,10 @@ export const createService = async (
     if (!req.user?.id) {
       throw createError('User not authenticated', 401);
     }
+    const existingServicesCount = await serviceService.countServicesByProviderId(req.user.id);
+    if (existingServicesCount >= SERVICE_LIMITS.MAX_SERVICES_PER_USER) {
+      throw createError('Maximum service limit reached. You can only create up to 3 services.', 403);
+    }
 
     const serviceData = {
       ...req.body,
@@ -193,6 +198,30 @@ export const createService = async (
   }
 };
 
+export const countServicesByProviderId = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user?.id) {
+      throw createError('User not authenticated', 401);
+    }
+
+    const existingServicesCount = await serviceService.countServicesByProviderId(req.user.id);
+    
+    
+    res.json({
+      status: 'success',
+      data: { count: existingServicesCount },
+      meta: {
+        message: 'Service count retrieved successfully',
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 export const updateService = async (
   req: AuthRequest,
   res: Response,
